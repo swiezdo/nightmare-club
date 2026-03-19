@@ -25,24 +25,24 @@ create table if not exists rotations (
   unique (map_id, week_start)
 );
 
-create table if not exists stages (
-  id uuid primary key default gen_random_uuid(),
-  rotation_id uuid not null references rotations(id) on delete cascade,
-  stage_number int not null check (stage_number between 1 and 4),
-  modifier_id uuid references modifiers(id) on delete set null,
-  unique (rotation_id, stage_number)
-);
-
 create table if not exists rounds (
   id uuid primary key default gen_random_uuid(),
-  stage_id uuid not null references stages(id) on delete cascade,
-  round_number int not null check (round_number between 1 and 3),
-  unique (stage_id, round_number)
+  rotation_id uuid not null references rotations(id) on delete cascade,
+  round_number int not null check (round_number between 1 and 4),
+  modifier_id uuid references modifiers(id) on delete set null,
+  unique (rotation_id, round_number)
+);
+
+create table if not exists waves (
+  id uuid primary key default gen_random_uuid(),
+  round_id uuid not null references rounds(id) on delete cascade,
+  wave_number int not null check (wave_number between 1 and 4),
+  unique (round_id, wave_number)
 );
 
 create table if not exists spawns (
   id uuid primary key default gen_random_uuid(),
-  round_id uuid not null references rounds(id) on delete cascade,
+  round_id uuid not null references waves(id) on delete cascade,
   spawn_index int not null,
   location text not null,
   element text not null,
@@ -77,16 +77,16 @@ on conflict (name) do nothing;
 alter table maps enable row level security;
 alter table modifiers enable row level security;
 alter table rotations enable row level security;
-alter table stages enable row level security;
 alter table rounds enable row level security;
+alter table waves enable row level security;
 alter table spawns enable row level security;
 
 -- Public read access on all tables
 create policy "Public read access" on maps for select to anon, authenticated using (true);
 create policy "Public read access" on modifiers for select to anon, authenticated using (true);
 create policy "Public read access" on rotations for select to anon, authenticated using (true);
-create policy "Public read access" on stages for select to anon, authenticated using (true);
 create policy "Public read access" on rounds for select to anon, authenticated using (true);
+create policy "Public read access" on waves for select to anon, authenticated using (true);
 create policy "Public read access" on spawns for select to anon, authenticated using (true);
 
 -- Authenticated write access on mutable tables
@@ -94,13 +94,13 @@ create policy "Authenticated insert" on rotations for insert to authenticated wi
 create policy "Authenticated update" on rotations for update to authenticated using (true) with check (true);
 create policy "Authenticated delete" on rotations for delete to authenticated using (true);
 
-create policy "Authenticated insert" on stages for insert to authenticated with check (true);
-create policy "Authenticated update" on stages for update to authenticated using (true) with check (true);
-create policy "Authenticated delete" on stages for delete to authenticated using (true);
-
 create policy "Authenticated insert" on rounds for insert to authenticated with check (true);
 create policy "Authenticated update" on rounds for update to authenticated using (true) with check (true);
 create policy "Authenticated delete" on rounds for delete to authenticated using (true);
+
+create policy "Authenticated insert" on waves for insert to authenticated with check (true);
+create policy "Authenticated update" on waves for update to authenticated using (true) with check (true);
+create policy "Authenticated delete" on waves for delete to authenticated using (true);
 
 create policy "Authenticated insert" on spawns for insert to authenticated with check (true);
 create policy "Authenticated update" on spawns for update to authenticated using (true) with check (true);

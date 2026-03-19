@@ -18,19 +18,19 @@
 		data.existingRotations?.find((r: any) => r.map_id === selectedMapId) ?? null
 	);
 
-	function getExistingSpawn(stageNum: number, roundNum: number, spawnIdx: number) {
+	function getExistingSpawn(roundNum: number, waveNum: number, spawnIdx: number) {
 		if (!existingRotation) return null;
-		const stage = existingRotation.stages?.find((s: any) => s.stage_number === stageNum);
-		if (!stage) return null;
-		const round = stage.rounds?.find((r: any) => r.round_number === roundNum);
+		const round = existingRotation.rounds?.find((r: any) => r.round_number === roundNum);
 		if (!round) return null;
-		return round.spawns?.find((sp: any) => sp.spawn_index === spawnIdx) ?? null;
+		const wave = round.waves?.find((w: any) => w.wave_number === waveNum);
+		if (!wave) return null;
+		return wave.spawns?.find((sp: any) => sp.spawn_index === spawnIdx) ?? null;
 	}
 
-	function getExistingModifier(stageNum: number): string {
+	function getExistingModifier(roundNum: number): string {
 		if (!existingRotation) return '';
-		const stage = existingRotation.stages?.find((s: any) => s.stage_number === stageNum);
-		return stage?.modifier_id ?? '';
+		const round = existingRotation.rounds?.find((r: any) => r.round_number === roundNum);
+		return round?.modifier_id ?? '';
 	}
 
 	const selectClass =
@@ -80,21 +80,22 @@
 			</div>
 		</div>
 
-		{#each [1, 2, 3, 4] as stageNum}
-			{@const spawnCount = stageNum <= 3 ? 3 : 4}
+		{#each [1, 2, 3, 4] as roundNum}
+			{@const waveCount = roundNum <= 3 ? 3 : 4}
+			{@const spawnCount = roundNum <= 3 ? 3 : 4}
 			<div class="rounded-lg border border-border p-4 space-y-4">
 				<div class="flex items-center gap-4">
-					<h3 class="text-lg font-semibold">Stage {stageNum}</h3>
+					<h3 class="text-lg font-semibold">Round {roundNum}</h3>
 					<div class="flex-1">
 						<select
-							name={`stage_${stageNum}_modifier`}
+							name={`round_${roundNum}_modifier`}
 							class={selectClass}
 						>
 							<option value="">No Modifier</option>
 							{#each data.modifiers as modifier}
 								<option
 									value={modifier.id}
-									selected={getExistingModifier(stageNum) === modifier.id}
+									selected={getExistingModifier(roundNum) === modifier.id}
 								>
 									{modifier.name}
 								</option>
@@ -103,25 +104,25 @@
 					</div>
 				</div>
 
-				{#each [1, 2, 3] as roundNum}
+				{#each Array.from({ length: waveCount }, (_, i) => i + 1) as waveNum}
 					<div class="space-y-2">
-						<h4 class="text-sm font-medium text-muted-foreground">Round {roundNum}</h4>
+						<h4 class="text-sm font-medium text-muted-foreground">Wave {waveNum}</h4>
 						<div class="grid gap-3 {spawnCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}">
 							{#each Array.from({ length: spawnCount }, (_, i) => i + 1) as spawnIdx}
-								{@const existing = getExistingSpawn(stageNum, roundNum, spawnIdx)}
+								{@const existing = getExistingSpawn(roundNum, waveNum, spawnIdx)}
 								<div class="flex items-center gap-2 rounded-md border border-border/50 bg-card p-2">
 									<span class="text-xs font-medium text-muted-foreground w-5">
 										{spawnIdx}
 									</span>
 									<SegmentedControl
 										options={locations}
-										name={`stage_${stageNum}_round_${roundNum}_spawn_${spawnIdx}_location`}
+										name={`round_${roundNum}_wave_${waveNum}_spawn_${spawnIdx}_location`}
 										value={existing?.location ?? ''}
 										required
 									/>
 									<SegmentedControl
 										options={elements}
-										name={`stage_${stageNum}_round_${roundNum}_spawn_${spawnIdx}_element`}
+										name={`round_${roundNum}_wave_${waveNum}_spawn_${spawnIdx}_element`}
 										value={existing?.element ?? ''}
 										required
 									/>

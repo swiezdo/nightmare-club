@@ -26,10 +26,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.select(
 			`
 			*,
-			stages:stages(
+			rounds:rounds(
 				*,
 				modifier:modifiers(*),
-				rounds:rounds(
+				waves:waves(
 					*,
 					spawns:spawns(*)
 				)
@@ -37,9 +37,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		`
 		)
 		.eq('week_start', weekStartStr)
-		.order('stage_number', { referencedTable: 'stages' })
-		.order('round_number', { referencedTable: 'stages.rounds' })
-		.order('spawn_index', { referencedTable: 'stages.rounds.spawns' });
+		.order('round_number', { referencedTable: 'rounds' })
+		.order('wave_number', { referencedTable: 'rounds.waves' })
+		.order('spawn_index', { referencedTable: 'rounds.waves.spawns' });
 
 	return {
 		maps,
@@ -71,7 +71,7 @@ export const actions: Actions = {
 				.maybeSingle();
 
 			if (existing) {
-				// Delete cascades through stages -> rounds -> spawns
+				// Delete cascades through rounds -> waves -> spawns
 				await supabase.from('rotations').delete().eq('id', existing.id);
 			}
 
@@ -86,61 +86,63 @@ export const actions: Actions = {
 				return fail(500, { error: `Failed to create rotation: ${rotError?.message}` });
 			}
 
-			// Process each stage (1-4)
-			for (let s = 1; s <= 4; s++) {
-				const modifierVal = formData.get(`stage_${s}_modifier`) as string;
+			// Process each round (1-4)
+			for (let r = 1; r <= 4; r++) {
+				const modifierVal = formData.get(`round_${r}_modifier`) as string;
 				const modifier_id = modifierVal || null;
 
-				const { data: stage, error: stageError } = await supabase
-					.from('stages')
+				const { data: round, error: roundError } = await supabase
+					.from('rounds')
 					.insert({
 						rotation_id: rotation.id,
-						stage_number: s,
+						round_number: r,
 						modifier_id
 					})
 					.select()
 					.single();
 
-				if (stageError || !stage) {
-					return fail(500, { error: `Failed to create stage ${s}: ${stageError?.message}` });
+				if (roundError || !round) {
+					return fail(500, { error: `Failed to create round ${r}: ${roundError?.message}` });
 				}
 
-				// Process each round (1-3)
-				for (let r = 1; r <= 3; r++) {
-					const { data: round, error: roundError } = await supabase
-						.from('rounds')
+				// Rounds 1-3: 3 waves, Round 4: 4 waves
+				const waveCount = r <= 3 ? 3 : 4;
+
+				for (let w = 1; w <= waveCount; w++) {
+					const { data: wave, error: waveError } = await supabase
+						.from('waves')
 						.insert({
-							stage_id: stage.id,
-							round_number: r
+							round_id: round.id,
+							wave_number: w
 						})
 						.select()
 						.single();
 
-					if (roundError || !round) {
+					if (waveError || !wave) {
 						return fail(500, {
-							error: `Failed to create round ${r} for stage ${s}: ${roundError?.message}`
+							error: `Failed to create wave ${w} for round ${r}: ${waveError?.message}`
 						});
 					}
 
-					// Stages 1-3 have 3 spawns, stage 4 has 4 spawns
-					const spawnCount = s <= 3 ? 3 : 4;
+					// Rounds 1-3: 3 spawns per wave, Round 4: 4 spawns per wave
+					const spawnCount = r <= 3 ? 3 : 4;
 
 					for (let i = 1; i <= spawnCount; i++) {
 						const location = formData.get(
-							`stage_${s}_round_${r}_spawn_${i}_location`
+							`round_${r}_wave_${w}_spawn_${i}_location`
 						) as string;
 						const element = formData.get(
-							`stage_${s}_round_${r}_spawn_${i}_element`
+							`round_${r}_wave_${w}_spawn_${i}_element`
 						) as string;
 
 						if (!location || !element) {
 							return fail(400, {
-								error: `Missing spawn data for stage ${s}, round ${r}, spawn ${i}.`
+								error: `Missing spawn data for round ${r}, wave ${w}, spawn ${i}.`
 							});
 						}
 
 						const { error: spawnError } = await supabase.from('spawns').insert({
-							round_id: round.id,
+							round_id: wave.id,
 							spawn_index: i,
 							location,
 							element

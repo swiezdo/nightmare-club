@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import type { MapWithRotation, RotationWithStages, StageWithRounds } from '$lib/types';
+import type { MapWithRotation, RotationWithRounds, RoundWithWaves } from '$lib/types';
 
 export const load: PageServerLoad = async (event) => {
 	const { data: maps, error: mapsError } = await event.locals.supabase
@@ -22,10 +22,10 @@ export const load: PageServerLoad = async (event) => {
 			.from('rotations')
 			.select(`
 				*,
-				stages(
+				rounds(
 					*,
 					modifier:modifiers(*),
-					rounds(
+					waves(
 						*,
 						spawns(*)
 					)
@@ -42,19 +42,19 @@ export const load: PageServerLoad = async (event) => {
 		const rotation = rotations?.[0] ?? null;
 
 		if (rotation) {
-			// Sort stages by stage_number
-			rotation.stages.sort(
-				(a: StageWithRounds, b: StageWithRounds) => a.stage_number - b.stage_number
+			// Sort rounds by round_number
+			rotation.rounds.sort(
+				(a: RoundWithWaves, b: RoundWithWaves) => a.round_number - b.round_number
 			);
 
-			// Sort rounds and spawns within each stage
-			for (const stage of rotation.stages) {
-				stage.rounds.sort(
-					(a: { round_number: number }, b: { round_number: number }) =>
-						a.round_number - b.round_number
+			// Sort waves and spawns within each round
+			for (const round of rotation.rounds) {
+				round.waves.sort(
+					(a: { wave_number: number }, b: { wave_number: number }) =>
+						a.wave_number - b.wave_number
 				);
-				for (const round of stage.rounds) {
-					round.spawns.sort(
+				for (const wave of round.waves) {
+					wave.spawns.sort(
 						(a: { spawn_index: number }, b: { spawn_index: number }) =>
 							a.spawn_index - b.spawn_index
 					);
@@ -64,7 +64,7 @@ export const load: PageServerLoad = async (event) => {
 
 		mapsWithRotations.push({
 			...map,
-			rotation: rotation as RotationWithStages | null
+			rotation: rotation as RotationWithRounds | null
 		});
 	}
 

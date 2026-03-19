@@ -17,42 +17,42 @@ export type Rotation = {
 	created_at: string;
 };
 
-export type Stage = {
+export type Round = {
 	id: string;
 	rotation_id: string;
-	stage_number: number;
+	round_number: number;
 	modifier_id: string | null;
 	modifier?: Modifier;
 };
 
-export type Round = {
+export type Wave = {
 	id: string;
-	stage_id: string;
-	round_number: number;
+	round_id: string;
+	wave_number: number;
 };
 
 export type Spawn = {
 	id: string;
-	round_id: string;
+	wave_id: string;
 	spawn_index: number;
 	location: string;
 	element: 'Sun' | 'Moon' | 'Storm';
 };
 
 // Nested types for display
-export type RoundWithSpawns = Round & {
+export type WaveWithSpawns = Wave & {
 	spawns: Spawn[];
 };
 
-export type StageWithRounds = Stage & {
-	rounds: RoundWithSpawns[];
+export type RoundWithWaves = Round & {
+	waves: WaveWithSpawns[];
 };
 
-export type RotationWithStages = Rotation & {
-	stages: StageWithRounds[];
+export type RotationWithRounds = Rotation & {
+	rounds: RoundWithWaves[];
 	map?: Map;
 };
 
 export type MapWithRotation = Map & {
-	rotation: RotationWithStages | null;
+	rotation: RotationWithRounds | null;
 };
