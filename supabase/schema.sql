@@ -54,9 +54,10 @@ create table if not exists spawns (
 -- ============================================================
 
 insert into maps (name, slug, locations) values
-  ('Hidden Temple', 'hidden-temple', '{"Pagoda","Cemetery","Courtyard"}'),
-  ('Frozen Valley', 'frozen-valley', '{"Waterfall","Hillside","Armory"}'),
-  ('Broken Castle', 'broken-castle', '{"Foundry","Burned Garden","Keep"}')
+  ('The Spider (Hidden Temple)', 'hidden-temple', '{"Pagoda","Cemetery","Courtyard"}'),
+  ('The Kitsune (Frozen Valley)', 'frozen-valley', '{"Waterfall","Hillside","Armory"}'),
+  ('The Oni (Broken Castle)', 'broken-castle', '{"Foundry","Burned Garden","Keep"}'),
+  ('The Snake (River Village)', 'river-village', '{"Beach","Rice Paddies","Village"}')
 on conflict (slug) do nothing;
 
 insert into modifiers (name) values
