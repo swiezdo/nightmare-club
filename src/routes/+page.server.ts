@@ -22,9 +22,9 @@ export const load: PageServerLoad = async (event) => {
 			.from('rotations')
 			.select(`
 				*,
+				challenge:challenges(*),
 				rounds(
 					*,
-					modifier:modifiers(*),
 					waves(
 						*,
 						spawns(*)

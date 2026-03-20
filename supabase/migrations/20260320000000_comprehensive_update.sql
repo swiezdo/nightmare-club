@@ -1,0 +1,4 @@
+-- Fresh database rebuild (2026-03-20)
+-- Tables were dropped and recreated from schema.sql via SQL Editor.
+-- This migration is marked as applied to keep supabase migration history in sync.
+-- Actual schema is defined in ../schema.sql

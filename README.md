@@ -10,17 +10,19 @@ Every Saturday, spawn rotations reset. Contributors log in to the admin page and
 
 **Maps:**
 
-- **Hidden Temple** — Pagoda, Cemetery, Courtyard
-- **Frozen Valley** — Waterfall, Hillside, Armory
-- **Broken Castle** — Foundry, Burned Garden, Keep
+- **The Spider (Hidden Temple)** — Pagoda, Cemetery, Courtyard
+- **The Kitsune (Frozen Valley)** — Waterfall, Hillside, Armory
+- **The Oni (Broken Castle)** — Foundry, Burned Garden, Keep
+- **The Snake (River Village)** — Beach, Rice Paddies, Village
 
 **Structure per map:**
 
-- 4 Stages (each with an optional modifier)
-- 3 Rounds per stage (12 rounds total)
-- Stage 1–3: 3 spawns per round
-- Stage 4: 4 spawns per round
-- Each spawn has a location (map-specific) and element (Sun / Moon / Storm)
+- 4 Stages
+- 3 Waves per stage (12 waves total)
+- Stage 1–3: 3 spawns per wave
+- Stage 4: 4 spawns per wave
+- Each spawn has a location (map-specific) and 1–2 attunements (Sun / Moon / Storm)
+- Optional weekly challenge per rotation (e.g. "Lose a location")
 
 ---
 
@@ -54,7 +56,7 @@ src/
 supabase/
 ├── schema.sql               # Database schema + seed data
 ├── seed.sql                 # Example rotation seed data
-└── migrate-maps.sql         # Migration for updating maps
+└── migrations/              # Supabase CLI migrations
 ```
 
 ---
@@ -62,13 +64,25 @@ supabase/
 ## Setup
 
 1. Create a Supabase project
-2. Run `supabase/schema.sql` in the Supabase SQL editor
+2. Run `supabase/schema.sql` in the Supabase SQL editor (or use `supabase db push` with the CLI)
 3. Optionally run `supabase/seed.sql` for example data
 4. Create admin user(s) via Supabase Auth dashboard
 5. Set environment variables:
    - `PUBLIC_SUPABASE_URL`
    - `PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT`
 6. `pnpm install && pnpm dev`
+
+---
+
+## Migrations
+
+Migration files live in `supabase/migrations/`. To apply:
+
+```bash
+supabase db push
+```
+
+Or paste the SQL directly in the Supabase SQL Editor.
 
 ---
 

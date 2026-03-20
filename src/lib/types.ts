@@ -5,9 +5,10 @@ export type Map = {
 	locations: string[];
 };
 
-export type Modifier = {
+export type Challenge = {
 	id: string;
 	name: string;
+	description: string;
 };
 
 export type Rotation = {
@@ -15,14 +16,14 @@ export type Rotation = {
 	map_id: string;
 	week_start: string;
 	created_at: string;
+	challenge_id: string | null;
+	challenge?: Challenge;
 };
 
 export type Round = {
 	id: string;
 	rotation_id: string;
 	round_number: number;
-	modifier_id: string | null;
-	modifier?: Modifier;
 };
 
 export type Wave = {
@@ -36,7 +37,7 @@ export type Spawn = {
 	wave_id: string;
 	spawn_index: number;
 	location: string;
-	element: 'Sun' | 'Moon' | 'Storm';
+	attunements: string[];
 };
 
 // Nested types for display

@@ -12,9 +12,10 @@ create table if not exists maps (
   locations text[] not null default '{}'
 );
 
-create table if not exists modifiers (
+create table if not exists challenges (
   id uuid primary key default gen_random_uuid(),
-  name text not null unique
+  name text not null unique,
+  description text not null default ''
 );
 
 create table if not exists rotations (
@@ -22,6 +23,7 @@ create table if not exists rotations (
   map_id uuid not null references maps(id) on delete cascade,
   week_start date not null,
   created_at timestamptz not null default now(),
+  challenge_id uuid references challenges(id) on delete set null,
   unique (map_id, week_start)
 );
 
@@ -29,7 +31,6 @@ create table if not exists rounds (
   id uuid primary key default gen_random_uuid(),
   rotation_id uuid not null references rotations(id) on delete cascade,
   round_number int not null check (round_number between 1 and 4),
-  modifier_id uuid references modifiers(id) on delete set null,
   unique (rotation_id, round_number)
 );
 
@@ -45,7 +46,7 @@ create table if not exists spawns (
   round_id uuid not null references waves(id) on delete cascade,
   spawn_index int not null,
   location text not null,
-  element text not null,
+  element text[] not null default '{}',
   unique (round_id, spawn_index)
 );
 
@@ -60,15 +61,8 @@ insert into maps (name, slug, locations) values
   ('The Snake (River Village)', 'river-village', '{"Beach","Rice Paddies","Village"}')
 on conflict (slug) do nothing;
 
-insert into modifiers (name) values
-  ('Fire'),
-  ('Ice'),
-  ('Shadow'),
-  ('Light'),
-  ('Wind'),
-  ('Thunder'),
-  ('Poison'),
-  ('Void')
+insert into challenges (name, description) values
+  ('lose-location', 'Lose a location at the start of the stage')
 on conflict (name) do nothing;
 
 -- ============================================================
@@ -76,7 +70,7 @@ on conflict (name) do nothing;
 -- ============================================================
 
 alter table maps enable row level security;
-alter table modifiers enable row level security;
+alter table challenges enable row level security;
 alter table rotations enable row level security;
 alter table rounds enable row level security;
 alter table waves enable row level security;
@@ -84,7 +78,7 @@ alter table spawns enable row level security;
 
 -- Public read access on all tables
 create policy "Public read access" on maps for select to anon, authenticated using (true);
-create policy "Public read access" on modifiers for select to anon, authenticated using (true);
+create policy "Public read access" on challenges for select to anon, authenticated using (true);
 create policy "Public read access" on rotations for select to anon, authenticated using (true);
 create policy "Public read access" on rounds for select to anon, authenticated using (true);
 create policy "Public read access" on waves for select to anon, authenticated using (true);

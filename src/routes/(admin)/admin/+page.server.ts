@@ -4,13 +4,13 @@ import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const supabase = locals.supabase;
 
-	const [mapsRes, modifiersRes] = await Promise.all([
+	const [mapsRes, challengesRes] = await Promise.all([
 		supabase.from('maps').select('*').order('name'),
-		supabase.from('modifiers').select('*').order('name')
+		supabase.from('challenges').select('*').order('name')
 	]);
 
 	const maps = mapsRes.data ?? [];
-	const modifiers = modifiersRes.data ?? [];
+	const challenges = challengesRes.data ?? [];
 
 	// Calculate current week_start (most recent Saturday)
 	const now = new Date();
@@ -26,9 +26,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.select(
 			`
 			*,
+			challenge:challenges(*),
 			rounds:rounds(
 				*,
-				modifier:modifiers(*),
 				waves:waves(
 					*,
 					spawns:spawns(*)
@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		maps,
-		modifiers,
+		challenges,
 		weekStart: weekStartStr,
 		existingRotations: existingRotations ?? []
 	};
@@ -56,6 +56,7 @@ export const actions: Actions = {
 
 		const map_id = formData.get('map_id') as string;
 		const week_start = formData.get('week_start') as string;
+		const challenge_id = (formData.get('challenge_id') as string) || null;
 
 		if (!map_id || !week_start) {
 			return fail(400, { error: 'Map and week start are required.' });
@@ -78,7 +79,7 @@ export const actions: Actions = {
 			// Insert new rotation
 			const { data: rotation, error: rotError } = await supabase
 				.from('rotations')
-				.insert({ map_id, week_start })
+				.insert({ map_id, week_start, challenge_id })
 				.select()
 				.single();
 
@@ -88,24 +89,20 @@ export const actions: Actions = {
 
 			// Process each round (1-4)
 			for (let r = 1; r <= 4; r++) {
-				const modifierVal = formData.get(`round_${r}_modifier`) as string;
-				const modifier_id = modifierVal || null;
-
 				const { data: round, error: roundError } = await supabase
 					.from('rounds')
 					.insert({
 						rotation_id: rotation.id,
-						round_number: r,
-						modifier_id
+						round_number: r
 					})
 					.select()
 					.single();
 
 				if (roundError || !round) {
-					return fail(500, { error: `Failed to create round ${r}: ${roundError?.message}` });
+					return fail(500, { error: `Failed to create stage ${r}: ${roundError?.message}` });
 				}
 
-				// Rounds 1-3: 3 waves, Round 4: 4 waves
+				// Stages 1-3: 3 waves, Stage 4: 4 waves
 				const waveCount = r <= 3 ? 3 : 4;
 
 				for (let w = 1; w <= waveCount; w++) {
@@ -120,32 +117,40 @@ export const actions: Actions = {
 
 					if (waveError || !wave) {
 						return fail(500, {
-							error: `Failed to create wave ${w} for round ${r}: ${waveError?.message}`
+							error: `Failed to create wave ${w} for stage ${r}: ${waveError?.message}`
 						});
 					}
 
-					// Rounds 1-3: 3 spawns per wave, Round 4: 4 spawns per wave
+					// Stages 1-3: 3 spawns per wave, Stage 4: 4 spawns per wave
 					const spawnCount = r <= 3 ? 3 : 4;
 
 					for (let i = 1; i <= spawnCount; i++) {
 						const location = formData.get(
 							`round_${r}_wave_${w}_spawn_${i}_location`
 						) as string;
-						const element = formData.get(
-							`round_${r}_wave_${w}_spawn_${i}_element`
+						const attunement1 = formData.get(
+							`round_${r}_wave_${w}_spawn_${i}_attunement_1`
+						) as string;
+						const attunement2 = formData.get(
+							`round_${r}_wave_${w}_spawn_${i}_attunement_2`
 						) as string;
 
-						if (!location || !element) {
+						if (!location || !attunement1) {
 							return fail(400, {
-								error: `Missing spawn data for round ${r}, wave ${w}, spawn ${i}.`
+								error: `Missing spawn data for stage ${r}, wave ${w}, spawn ${i}.`
 							});
+						}
+
+						const attunements = [attunement1];
+						if (attunement2) {
+							attunements.push(attunement2);
 						}
 
 						const { error: spawnError } = await supabase.from('spawns').insert({
 							round_id: wave.id,
 							spawn_index: i,
 							location,
-							element
+							element: attunements
 						});
 
 						if (spawnError) {

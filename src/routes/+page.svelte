@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Tabs, TabsList, TabsTrigger, TabsContent } from '$lib/components/ui/tabs';
 	import MapTable from '$lib/components/MapTable.svelte';
+	import ResetCountdown from '$lib/components/ResetCountdown.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -29,6 +30,9 @@
 		{#if currentWeek()}
 			<p class="mt-2 text-muted-foreground">Week of {currentWeek()}</p>
 		{/if}
+		<div class="mt-3">
+			<ResetCountdown />
+		</div>
 	</div>
 
 	{#if data.maps.length > 0}
@@ -40,7 +44,7 @@
 			</TabsList>
 			{#each data.maps as map}
 				<TabsContent value={map.slug}>
-					<MapTable rotation={map.rotation} />
+					<MapTable rotation={map.rotation} mapSlug={map.slug} />
 				</TabsContent>
 			{/each}
 		</Tabs>
