@@ -55,8 +55,8 @@ export const load: PageServerLoad = async (event) => {
 				);
 				for (const wave of round.waves) {
 					wave.spawns.sort(
-						(a: { spawn_index: number }, b: { spawn_index: number }) =>
-							a.spawn_index - b.spawn_index
+						(a: { spawn_order: number }, b: { spawn_order: number }) =>
+							a.spawn_order - b.spawn_order
 					);
 				}
 			}

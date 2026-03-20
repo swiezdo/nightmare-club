@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.eq('week_start', weekStartStr)
 		.order('round_number', { referencedTable: 'rounds' })
 		.order('wave_number', { referencedTable: 'rounds.waves' })
-		.order('spawn_index', { referencedTable: 'rounds.waves.spawns' });
+		.order('spawn_order', { referencedTable: 'rounds.waves.spawns' });
 
 	return {
 		maps,
@@ -152,7 +152,7 @@ export const actions: Actions = {
 
 						const { error: spawnError } = await supabase.from('spawns').insert({
 							round_id: wave.id,
-							spawn_index: i,
+							spawn_order: i,
 							location,
 							element: attunements
 						});

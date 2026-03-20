@@ -44,10 +44,10 @@ create table if not exists waves (
 create table if not exists spawns (
   id uuid primary key default gen_random_uuid(),
   round_id uuid not null references waves(id) on delete cascade,
-  spawn_index int not null,
+  spawn_order int not null,
   location text not null,
   element text[] not null default '{}',
-  unique (round_id, spawn_index)
+  unique (round_id, spawn_order)
 );
 
 -- ============================================================

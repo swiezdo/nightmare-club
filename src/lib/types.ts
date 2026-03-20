@@ -35,7 +35,7 @@ export type Wave = {
 export type Spawn = {
 	id: string;
 	wave_id: string;
-	spawn_index: number;
+	spawn_order: number;
 	location: string;
 	attunements: string[];
 };
