@@ -166,7 +166,7 @@ export const actions: Actions = {
 				}
 			}
 
-			return { success: true, savedMapId: mapId };
+			return { success: true, savedMapId: map_id };
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
 			return fail(500, { error: message });
