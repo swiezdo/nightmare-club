@@ -89,7 +89,7 @@ begin
     (v_wave_id, 2, 'Cemetery', '{Moon}'),
     (v_wave_id, 3, 'Pagoda', '{Sun}');
 
-  -- Stage 4 (4 waves, 4 spawns)
+  -- Stage 4 (3 waves, 4 spawns)
   insert into rounds (rotation_id, round_number) values (v_rotation_id, 4) returning id into v_round_id;
 
   insert into waves (round_id, wave_number) values (v_round_id, 1) returning id into v_wave_id;
@@ -112,13 +112,6 @@ begin
     (v_wave_id, 2, 'Courtyard', '{Sun}'),
     (v_wave_id, 3, 'Pagoda', '{Moon}'),
     (v_wave_id, 4, 'Cemetery', '{Storm}');
-
-  insert into waves (round_id, wave_number) values (v_round_id, 4) returning id into v_wave_id;
-  insert into spawns (round_id, spawn_order, location, element) values
-    (v_wave_id, 1, 'Pagoda', '{Sun,Moon}'),
-    (v_wave_id, 2, 'Cemetery', '{Storm}'),
-    (v_wave_id, 3, 'Courtyard', '{Moon}'),
-    (v_wave_id, 4, 'Pagoda', '{Sun}');
 
   -- ============================================================
   -- Frozen Valley (no attunements, no challenge)
@@ -192,7 +185,7 @@ begin
     (v_wave_id, 2, 'Hillside', '{}'),
     (v_wave_id, 3, 'Waterfall', '{}');
 
-  -- Stage 4 (4 waves, 4 spawns)
+  -- Stage 4 (3 waves, 4 spawns)
   insert into rounds (rotation_id, round_number) values (v_rotation_id, 4) returning id into v_round_id;
 
   insert into waves (round_id, wave_number) values (v_round_id, 1) returning id into v_wave_id;
@@ -215,13 +208,6 @@ begin
     (v_wave_id, 2, 'Armory', '{}'),
     (v_wave_id, 3, 'Waterfall', '{}'),
     (v_wave_id, 4, 'Hillside', '{}');
-
-  insert into waves (round_id, wave_number) values (v_round_id, 4) returning id into v_wave_id;
-  insert into spawns (round_id, spawn_order, location, element) values
-    (v_wave_id, 1, 'Armory', '{}'),
-    (v_wave_id, 2, 'Hillside', '{}'),
-    (v_wave_id, 3, 'Waterfall', '{}'),
-    (v_wave_id, 4, 'Armory', '{}');
 
   -- ============================================================
   -- Broken Castle (no attunements, no challenge)
@@ -295,7 +281,7 @@ begin
     (v_wave_id, 2, 'Foundry', '{}'),
     (v_wave_id, 3, 'Keep', '{}');
 
-  -- Stage 4 (4 waves, 4 spawns)
+  -- Stage 4 (3 waves, 4 spawns)
   insert into rounds (rotation_id, round_number) values (v_rotation_id, 4) returning id into v_round_id;
 
   insert into waves (round_id, wave_number) values (v_round_id, 1) returning id into v_wave_id;
@@ -318,13 +304,6 @@ begin
     (v_wave_id, 2, 'Burned Garden', '{}'),
     (v_wave_id, 3, 'Keep', '{}'),
     (v_wave_id, 4, 'Foundry', '{}');
-
-  insert into waves (round_id, wave_number) values (v_round_id, 4) returning id into v_wave_id;
-  insert into spawns (round_id, spawn_order, location, element) values
-    (v_wave_id, 1, 'Keep', '{}'),
-    (v_wave_id, 2, 'Foundry', '{}'),
-    (v_wave_id, 3, 'Burned Garden', '{}'),
-    (v_wave_id, 4, 'Keep', '{}');
 
   -- ============================================================
   -- River Village (no attunements, with challenge)
@@ -398,7 +377,7 @@ begin
     (v_wave_id, 2, 'Rice Paddies', '{}'),
     (v_wave_id, 3, 'Beach', '{}');
 
-  -- Stage 4 (4 waves, 4 spawns)
+  -- Stage 4 (3 waves, 4 spawns)
   insert into rounds (rotation_id, round_number) values (v_rotation_id, 4) returning id into v_round_id;
 
   insert into waves (round_id, wave_number) values (v_round_id, 1) returning id into v_wave_id;
@@ -419,13 +398,6 @@ begin
   insert into spawns (round_id, spawn_order, location, element) values
     (v_wave_id, 1, 'Village', '{}'),
     (v_wave_id, 2, 'Rice Paddies', '{}'),
-    (v_wave_id, 3, 'Beach', '{}'),
-    (v_wave_id, 4, 'Village', '{}');
-
-  insert into waves (round_id, wave_number) values (v_round_id, 4) returning id into v_wave_id;
-  insert into spawns (round_id, spawn_order, location, element) values
-    (v_wave_id, 1, 'Rice Paddies', '{}'),
-    (v_wave_id, 2, 'Village', '{}'),
     (v_wave_id, 3, 'Beach', '{}'),
     (v_wave_id, 4, 'Village', '{}');
 

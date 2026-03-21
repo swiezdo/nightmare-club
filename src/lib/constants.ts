@@ -12,7 +12,7 @@ export const ROUND_STRUCTURE = {
 	1: { waves: 3, spawns: 3 },
 	2: { waves: 3, spawns: 3 },
 	3: { waves: 3, spawns: 3 },
-	4: { waves: 4, spawns: 4 }
+	4: { waves: 3, spawns: 4 }
 } as const;
 
 export const ROUND_COUNT = 4;
