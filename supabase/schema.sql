@@ -78,7 +78,10 @@ insert into challenges (name, description) values
   ('ranged-last-hit', 'Last hit requires Ranged or thrown weapon damage'),
   ('much-more-damage', 'Enemies deal much more damage'),
   ('increased-cooldowns', 'Role Ability cooldowns are increased'),
-  ('unique-enemy-ambush', 'Unique Enemy Ambush')
+  ('unique-enemy-ambush', 'Unique Enemy Ambush'),
+  ('spirit-healing-drunk', 'Spirit Healing makes Ghosts drunk'),
+  ('extremely-fast-attacks', 'Extremely fast attacks'),
+  ('ghost-health-drain', 'Ghost''s Health slowly drains')
 on conflict (name) do nothing;
 
 -- ============================================================

@@ -25,7 +25,7 @@
 						</h3>
 						{#if round.challenge}
 							<Badge variant="destructive" class="text-xs uppercase">Challenge</Badge>
-							<span class="text-sm font-medium text-gray-100">{round.challenge.name}</span>
+							<span class="text-sm font-medium text-gray-100">{round.challenge.description}</span>
 						{/if}
 					</div>
 				</div>

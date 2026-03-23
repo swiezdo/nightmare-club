@@ -28,11 +28,6 @@
             null,
     );
 
-    // Set of challenge IDs already selected across all stages
-    let usedChallengeIds = $derived(
-        new Set(Object.values(stageChallenges).filter(Boolean)),
-    );
-
     // Track second attunement visibility per spawn
     let showSecondAttunement: Record<string, boolean> = $state({});
 
@@ -177,10 +172,8 @@
                             {#each data.challenges as challenge}
                                 <option
                                     value={challenge.id}
-                                    disabled={usedChallengeIds.has(challenge.id) &&
-                                        challenge.id !== currentChallenge}
                                 >
-                                    {challenge.name}
+                                    {challenge.description}
                                 </option>
                             {/each}
                         </select>
