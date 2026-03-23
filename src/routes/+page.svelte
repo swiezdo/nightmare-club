@@ -21,12 +21,18 @@
         downloading = true;
         try {
             const { domToJpeg } = await import("modern-screenshot");
-            const isLight = document.documentElement.classList.contains("light");
+            const exportWidth = Math.max(captureTarget.clientWidth, 820);
+            const backgroundColor = getComputedStyle(document.body).backgroundColor;
             const dataUrl = await domToJpeg(captureTarget, {
                 quality: 0.92,
                 scale: 2,
-                backgroundColor: isLight ? "#f6f0df" : "#181a20",
-                style: { padding: "24px" },
+                backgroundColor,
+                style: {
+                    padding: "24px",
+                    width: `${exportWidth}px`,
+                    maxWidth: `${exportWidth}px`,
+                    overflow: "hidden",
+                },
                 filter: (node: Node) => {
                     if (
                         node instanceof HTMLElement &&
@@ -71,7 +77,10 @@
     }
 </script>
 
-<div bind:this={captureTarget} class="mx-auto max-w-5xl px-2 py-4 sm:px-4 sm:py-8">
+<div
+    bind:this={captureTarget}
+    class="mx-auto max-w-5xl overflow-hidden px-2 py-4 sm:px-4 sm:py-8"
+>
     <div class="mb-6 text-center">
         <div class="mb-3 flex justify-end" data-html2img-ignore>
             <ThemeToggle />
