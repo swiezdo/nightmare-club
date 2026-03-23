@@ -69,8 +69,9 @@ export const GET: RequestHandler = async ({ locals }) => {
 							.sort((a: { spawn_order: number }, b: { spawn_order: number }) =>
 								a.spawn_order - b.spawn_order
 							)
-							.map((spawn: { location: string; element: string[] }) => ({
+							.map((spawn: { location: string; spawn_point: string | null; element: string[] }) => ({
 								location: spawn.location,
+								spawn_point: spawn.spawn_point,
 								...(hasAttunements && { attunements: spawn.element ?? [] })
 							}))
 					}))

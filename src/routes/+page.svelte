@@ -9,6 +9,7 @@
     import { Download } from "lucide-svelte";
     import MapTable from "$lib/components/MapTable.svelte";
     import ResetCountdown from "$lib/components/ResetCountdown.svelte";
+    import ThemeToggle from "$lib/components/ThemeToggle.svelte";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
@@ -20,10 +21,11 @@
         downloading = true;
         try {
             const { domToJpeg } = await import("modern-screenshot");
+            const isLight = document.documentElement.classList.contains("light");
             const dataUrl = await domToJpeg(captureTarget, {
                 quality: 0.92,
                 scale: 2,
-                backgroundColor: "#181a20",
+                backgroundColor: isLight ? "#f6f0df" : "#181a20",
                 style: { padding: "24px" },
                 filter: (node: Node) => {
                     if (
@@ -71,6 +73,9 @@
 
 <div bind:this={captureTarget} class="mx-auto max-w-5xl px-2 py-4 sm:px-4 sm:py-8">
     <div class="mb-6 text-center">
+        <div class="mb-3 flex justify-end" data-html2img-ignore>
+            <ThemeToggle />
+        </div>
         <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
             Nightmare Club — Spawn Rotations
         </h1>

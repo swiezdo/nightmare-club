@@ -6,6 +6,7 @@
         PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT,
     } from "$env/static/public";
     import { Button } from "$lib/components/ui/button";
+    import ThemeToggle from "$lib/components/ThemeToggle.svelte";
     import type { Snippet } from "svelte";
 
     let { children }: { children: Snippet } = $props();
@@ -29,7 +30,10 @@
             <h1 class="text-xl font-bold text-foreground">
                 Nightmare Club Admin
             </h1>
-            <Button variant="outline" onclick={handleLogout}>Logout</Button>
+            <div class="flex items-center gap-2">
+                <ThemeToggle />
+                <Button variant="outline" onclick={handleLogout}>Logout</Button>
+            </div>
         </div>
     </nav>
 

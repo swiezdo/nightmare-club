@@ -35,10 +35,11 @@ export type Wave = {
 
 export type Spawn = {
 	id: string;
-	wave_id: string;
+	round_id: string;
 	spawn_order: number;
 	location: string;
-	attunements: string[];
+	spawn_point: string | null;
+	element: string[];
 };
 
 // Nested types for display

@@ -46,7 +46,10 @@ create table if not exists spawns (
   round_id uuid not null references waves(id) on delete cascade,
   spawn_order int not null,
   location text not null,
+  spawn_point text,
   element text[] not null default '{}',
+  constraint spawns_spawn_point_length_check
+    check (spawn_point is null or char_length(spawn_point) <= 15),
   unique (round_id, spawn_order)
 );
 

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import { Button } from "$lib/components/ui/button";
+    import { Input } from "$lib/components/ui/input";
     import { Alert, AlertDescription } from "$lib/components/ui/alert";
     import { SegmentedControl } from "$lib/components/ui/segmented-control";
     import {
@@ -8,6 +9,7 @@
         ROUND_STRUCTURE,
         ATTUNEMENT_MAP_SLUGS,
     } from "$lib/constants";
+    import { clampSpawnPoint } from "$lib/theme";
     import type { PageData, ActionData } from "./$types";
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -62,6 +64,11 @@
 
     function spawnKey(r: number, w: number, s: number): string {
         return `${r}_${w}_${s}`;
+    }
+
+    function clipSpawnPointInput(event: Event) {
+        const target = event.currentTarget as HTMLInputElement;
+        target.value = clampSpawnPoint(target.value);
     }
 
     function hasSecondAttunement(
@@ -220,6 +227,16 @@
                                             name={`round_${roundNum}_wave_${waveNum}_spawn_${spawnIdx}_location`}
                                             value={existing?.location ?? ""}
                                             required
+                                        />
+                                    </div>
+                                    <div class="pl-5">
+                                        <Input
+                                            name={`round_${roundNum}_wave_${waveNum}_spawn_${spawnIdx}_spawn_point`}
+                                            value={existing?.spawn_point ?? ""}
+                                            maxlength={15}
+                                            placeholder="Spawn point"
+                                            class="h-8 text-xs"
+                                            oninput={clipSpawnPointInput}
                                         />
                                     </div>
                                     {#if hasAttunements}
