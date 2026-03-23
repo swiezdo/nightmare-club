@@ -1,8 +1,8 @@
 /** Attunement names and their display colours */
 export const ATTUNEMENTS = {
 	Sun: '#e07722',
-	Moon: '#6289f5',
-	Storm: '#47d12c'
+	Moon: '#3b5ec9',
+	Storm: '#2d8a1e'
 } as const;
 
 export const ATTUNEMENT_NAMES = Object.keys(ATTUNEMENTS) as (keyof typeof ATTUNEMENTS)[];

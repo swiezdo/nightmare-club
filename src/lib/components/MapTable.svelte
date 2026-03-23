@@ -42,23 +42,26 @@
 					<tbody>
 						{#each round.waves as wave, wi}
 							<tr class="{wi % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700/50'} border-b border-gray-700/50 last:border-0">
-								<td class="px-2 py-1.5 font-mono text-xs font-semibold text-gray-400">
+								<td class="px-2 py-3 font-mono text-xs font-semibold text-gray-400">
 									{wave.wave_number}
 								</td>
 								{#each wave.spawns as spawn}
 									{@const atts = spawn.element ?? []}
-									<td class="px-2 py-1.5">
-										<span class="font-medium text-gray-100">{spawn.location}</span>
-										{#if hasAttunements && atts.length > 0}
-											<span class="ml-1 inline-flex gap-0.5">
-												{#each atts as att}
-													<span
-														class="inline-block h-2 w-2 rounded-full"
-														style="background-color: {attunementColor(att)}"
-														title={att}
-													></span>
-												{/each}
-											</span>
+									<td class="px-2 py-3">
+										{#if hasAttunements && atts.length === 1}
+											<span
+												class="inline-block rounded-full px-3.5 py-1 text-sm font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+												style="background-color: {attunementColor(atts[0])}"
+												title={atts[0]}
+											>{spawn.location}</span>
+										{:else if hasAttunements && atts.length >= 2}
+											<span
+												class="inline-block rounded-full px-3.5 py-1 text-sm font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+												style="background: linear-gradient(to right, {attunementColor(atts[0])} 50%, {attunementColor(atts[1])} 50%)"
+												title="{atts[0]} / {atts[1]}"
+											>{spawn.location}</span>
+										{:else}
+											<span class="font-medium text-gray-100">{spawn.location}</span>
 										{/if}
 									</td>
 								{/each}
