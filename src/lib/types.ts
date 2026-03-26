@@ -61,3 +61,22 @@ export type RotationWithRounds = Rotation & {
 export type MapWithRotation = Map & {
 	rotation: RotationWithRounds | null;
 };
+
+export type UpsertRotationPayload = {
+	map_id: string;
+	week_start: string;
+	credit_text: string | null;
+	challenges: { challenge_id: string; round_number: number }[];
+	rounds: {
+		round_number: number;
+		waves: {
+			wave_number: number;
+			spawns: {
+				spawn_order: number;
+				location: string;
+				spawn_point: string | null;
+				element: string[];
+			}[];
+		}[];
+	}[];
+};
