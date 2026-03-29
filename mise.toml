@@ -1,2 +1,5 @@
 [tool_alias]
 node = '24'
+
+[tools]
+node = "24"

@@ -1,5 +1,11 @@
 import { RESET_SCHEDULE } from '$lib/constants';
 
+type ZonedDateParts = {
+	weekday: number;
+	hour: number;
+	dateStr: string;
+};
+
 function formatDateParts(year: number, month: number, day: number): string {
 	const monthStr = String(month).padStart(2, '0');
 	const dayStr = String(day).padStart(2, '0');
@@ -13,7 +19,7 @@ function addDays(dateStr: string, days: number): string {
 	return formatDateParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
 }
 
-function getZonedDateParts(date: Date) {
+function getZonedDateParts(date: Date): ZonedDateParts {
 	const parts = new Intl.DateTimeFormat('en-US', {
 		timeZone: RESET_SCHEDULE.timezone,
 		weekday: 'short',
@@ -41,14 +47,14 @@ function getZonedDateParts(date: Date) {
 
 	return {
 		weekday: dayMap[weekdayStr] ?? 0,
-		hour: Number(parts.find((part) => part.type === 'hour')?.value ?? '0'),
+		// Some Intl implementations emit "24" for times shortly after midnight.
+		hour: parseInt(parts.find((part) => part.type === 'hour')?.value ?? '0', 10) % 24,
 		dateStr: formatDateParts(year, month, day)
 	};
 }
 
 /** Returns the current rotation week start date for the Melbourne reset schedule. */
-export function getCurrentWeekStart(): string {
-	const now = new Date();
+export function getCurrentWeekStart(now = new Date()): string {
 	const zoned = getZonedDateParts(now);
 	let daysSinceReset = (zoned.weekday - RESET_SCHEDULE.weekday + 7) % 7;
 
