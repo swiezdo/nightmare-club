@@ -80,7 +80,6 @@ export const load: PageServerLoad = async (event) => {
       rotation: rotationByMapId.get(map.id)!
     }));
 
-  // Cache at Vercel CDN edge: 1 hour, serve stale up to 24 hours while revalidating
   event.setHeaders({
     'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
   });

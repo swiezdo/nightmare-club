@@ -66,16 +66,45 @@ export const actions: Actions = {
 		const startedAt = performance.now();
 
 		const map_id = formData.get('map_id') as string;
-		const week_start = formData.get('week_start') as string;
 		const map_slug = formData.get('map_slug') as string;
+		const existing_rotation_id = (formData.get('existing_rotation_id') as string) || null;
 		const credit_text = normalizeCreditText(formData.get('credit_text'));
 		const mapHasAttunements = ATTUNEMENT_MAP_SLUGS.has(map_slug);
+		const currentWeekStart = getCurrentWeekStart();
 
-		if (!map_id || !week_start) {
-			return fail(400, { error: 'Map and week start are required.' });
+		if (!map_id) {
+			return fail(400, { error: 'Map is required.' });
 		}
 
 		try {
+			let resolvedWeekStart = currentWeekStart;
+
+			if (existing_rotation_id) {
+				const { data: existingRotation, error: existingRotationError } = await supabase
+					.from('rotations')
+					.select('id, map_id, week_start')
+					.eq('id', existing_rotation_id)
+					.maybeSingle();
+
+				if (existingRotationError) {
+					return fail(500, {
+						error: `Failed to verify existing rotation: ${existingRotationError.message}`
+					});
+				}
+
+				if (!existingRotation) {
+					return fail(400, { error: 'Existing rotation no longer exists. Reload and try again.' });
+				}
+
+				if (existingRotation.map_id !== map_id) {
+					return fail(400, {
+						error: 'Selected map does not match the existing rotation. Reload and try again.'
+					});
+				}
+
+				resolvedWeekStart = existingRotation.week_start;
+			}
+
 			// Build nested payload for the RPC call
 			const challenges: UpsertRotationPayload['challenges'] = [];
 			const rounds: UpsertRotationPayload['rounds'] = [];
@@ -134,8 +163,9 @@ export const actions: Actions = {
 			}
 
 			const payload: UpsertRotationPayload = {
+				rotation_id: existing_rotation_id,
 				map_id,
-				week_start,
+				week_start: resolvedWeekStart,
 				credit_text,
 				challenges,
 				rounds
@@ -154,7 +184,9 @@ export const actions: Actions = {
 			console.info('[admin save] rotation persisted', {
 				rotation_id,
 				map_id,
-				week_start,
+				week_start: resolvedWeekStart,
+				existing_rotation_id,
+				currentWeekStart,
 				has_credit_text: Boolean(credit_text),
 				challenges: challenges.length,
 				rounds: rounds.length,

@@ -124,8 +124,8 @@
     {/if}
 
     <form method="POST" action="?/save" use:enhance class="space-y-8">
-        <input type="hidden" name="week_start" value={data.weekStart} />
         <input type="hidden" name="map_slug" value={selectedMap?.slug ?? ""} />
+        <input type="hidden" name="existing_rotation_id" value={existingRotation?.id ?? ""} />
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="space-y-2">

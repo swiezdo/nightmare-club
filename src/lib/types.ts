@@ -63,6 +63,7 @@ export type MapWithRotation = Map & {
 };
 
 export type UpsertRotationPayload = {
+	rotation_id?: string | null;
 	map_id: string;
 	week_start: string;
 	credit_text: string | null;

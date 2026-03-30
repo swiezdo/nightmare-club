@@ -34,6 +34,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 			`)
 			.eq('map_id', map.id)
 			.eq('week_start', weekStart)
+			.order('created_at', { ascending: false })
 			.limit(1);
 
 		if (rotError) {
