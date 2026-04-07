@@ -2,9 +2,7 @@ import {
 	collectUnexpectedKeys,
 	fail,
 	getAdminSupabase,
-	isIsoDate,
 	isPlainObject,
-	isTsushimaWeekAnchorDate,
 	normalizeOptionalString,
 	ok,
 	readJsonBody,
@@ -12,6 +10,7 @@ import {
 	requireJsonRequest,
 	type ApiErrorDetail
 } from '$lib/server/bot-api';
+import { getTsushimaWeekStart } from '$lib/dates';
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
@@ -39,26 +38,30 @@ type TsushimaMapRow = {
 const TSUSHIMA_WAVE_COUNT = 15;
 const TSUSHIMA_SPAWN_COUNT = 3;
 
-export const PUT: RequestHandler = async ({ params, request }) => {
+export const PUT: RequestHandler = async ({ request }) => {
 	const authError = requireBearerToken(request, env.BOT_API_TOKEN_TSUSHIMA);
 	if (authError) return authError;
 
 	const contentTypeError = requireJsonRequest(request);
 	if (contentTypeError) return contentTypeError;
 
-	const { week_start, map_slug } = params;
-	if (!isIsoDate(week_start) || !isTsushimaWeekAnchorDate(week_start)) {
-		return fail(400, 'validation_error', 'week_start must be a Friday in YYYY-MM-DD format.', [
-			{
-				path: 'week_start',
-				message:
-					'Expected the Friday date that starts this Tsushima rotation week (weekly in-game refresh).'
-			}
+	const { data: body, error: bodyError } = await readJsonBody(request);
+	if (bodyError) return bodyError;
+
+	if (!isPlainObject(body)) {
+		return fail(400, 'validation_error', 'Request body must be a JSON object.', [
+			{ path: '', message: 'Expected a JSON object.' }
 		]);
 	}
 
-	const { data: body, error: bodyError } = await readJsonBody(request);
-	if (bodyError) return bodyError;
+	const map_slug = typeof body.map_slug === 'string' ? body.map_slug.trim() : '';
+	if (!map_slug) {
+		return fail(400, 'validation_error', 'Payload validation failed.', [
+			{ path: 'map_slug', message: 'Expected a non-empty map_slug string.' }
+		]);
+	}
+
+	const week_start = getTsushimaWeekStart();
 
 	const supabase = getAdminSupabase();
 	const { data: map, error: mapError } = await supabase
@@ -78,9 +81,10 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		return fail(400, 'validation_error', 'Payload validation failed.', validation.details);
 	}
 
-	const { data: rotationId, error: rpcError } = await supabase.rpc('upsert_tsushima_rotation', {
-		payload: validation.payload
-	});
+	const { data: rotationId, error: rpcError } = await supabase.rpc(
+		'upsert_tsushima_rotation',
+		{ payload: validation.payload } as never
+	);
 
 	if (rpcError || !rotationId) {
 		console.error('[bot api] failed to persist tsushima rotation', rpcError);
@@ -112,7 +116,7 @@ function validateTsushimaPayload(
 		};
 	}
 
-	collectUnexpectedKeys(body, ['credit_text', 'week_code', 'waves'], '', details);
+	collectUnexpectedKeys(body, ['map_slug', 'credit_text', 'week_code', 'waves'], '', details);
 
 	const creditText = normalizeCreditText(body.credit_text, 'credit_text', details);
 	const weekCode = typeof body.week_code === 'string' ? body.week_code.trim() : '';
@@ -272,7 +276,7 @@ export const GET: RequestHandler = async () =>
 			ok: true,
 			game: 'tsushima',
 			method: 'PUT',
-			path: '/api/rotations/tsushima/{week_start}/{map_slug}'
+			path: '/api/rotations/tsushima'
 		},
 		{ status: 200 }
 	);

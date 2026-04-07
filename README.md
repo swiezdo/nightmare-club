@@ -134,8 +134,8 @@ The admin workflow is designed around trusted contributors rather than a large m
 
 Two authenticated write endpoints are available:
 
-- `PUT /api/rotations/yotei/{week_start}/{map_slug}`
-- `PUT /api/rotations/tsushima/{week_start}/{map_slug}`
+- `PUT /api/rotations/yotei`
+- `PUT /api/rotations/tsushima`
 
 Authentication:
 
@@ -144,15 +144,13 @@ Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
-Path `week_start` must be `YYYY-MM-DD`:
-
-- **Yōtei:** a **Tuesday** (Melbourne rotation week).
-- **Tsushima:** a **Friday** date for the Tsushima rotation week (aligned with the weekly in-game refresh; same anchor the site uses for the countdown in local time).
+The JSON body must include **`map_slug`**. **`week_start` is not sent**; the server picks the current rotation week using the same rules as the public site (`getCurrentWeekStart` for Yōtei, `getTsushimaWeekStart` for Tsushima). Successful responses echo the stored `week_start` so clients can log which week was written.
 
 ### Yotei Payload
 
 ```json
 {
+  "map_slug": "river-village",
   "credit_text": "Thanks to Player 1 and Player 2",
   "challenges": [
     { "round": 1, "slug": "lose-location" }
@@ -194,6 +192,7 @@ Tsushima keeps map metadata, weekly modifiers, and objectives in the database. T
 
 ```json
 {
+  "map_slug": "the-defence-of-aoi-village",
   "credit_text": "Submitted by NightmareBot",
   "week_code": "1.3",
   "waves": [
