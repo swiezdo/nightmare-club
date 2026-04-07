@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { json } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { timingSafeEqual } from 'node:crypto';
@@ -150,12 +151,12 @@ let adminClient:
 	| null = null;
 
 export function getAdminSupabase() {
-	if (!env.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+	if (!PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
 		throw new Error('Supabase admin environment variables are not configured.');
 	}
 
 	if (!adminClient) {
-		adminClient = createClient(env.PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+		adminClient = createClient(PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
 			auth: {
 				autoRefreshToken: false,
 				persistSession: false
