@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nightmare.club/schemas/tsushima-rotation-payload.schema.json",
+  "title": "Nightmare Club Tsushima Rotation Payload",
+  "description": "Request body for PUT /api/rotations/tsushima/{week_start}/{map_slug}. The map-specific zone, spawn, and week_code constraints depend on the map_slug path parameter and are documented in x-mapConstraints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "week_code",
+    "waves"
+  ],
+  "properties": {
+    "credit_text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional attribution text shown on the site.",
+      "maxLength": 500
+    },
+    "week_code": {
+      "type": "string",
+      "description": "The Tsushima week code for the selected map. Allowed values depend on the map_slug path parameter.",
+      "minLength": 1
+    },
+    "waves": {
+      "type": "array",
+      "description": "Exactly 15 waves are required.",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "$ref": "#/$defs/wave"
+      }
+    }
+  },
+  "$defs": {
+    "wave": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wave",
+        "spawns"
+      ],
+      "properties": {
+        "wave": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15,
+          "description": "Wave number. In practice the API expects sequential values 1 through 15."
+        },
+        "spawns": {
+          "type": "array",
+          "description": "Exactly 3 spawns are required per wave.",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/spawn"
+          }
+        }
+      }
+    },
+    "spawn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "zone",
+        "spawn"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Spawn order within the wave. In practice the API expects sequential values 1 through 3."
+        },
+        "zone": {
+          "type": "string",
+          "description": "Top-level defense area / spawn point. Allowed values depend on map_slug."
+        },
+        "spawn": {
+          "type": "string",
+          "description": "Sub-spawn within the selected zone. Allowed values depend on both map_slug and zone."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "credit_text": "Submitted by NightmareBot",
+      "week_code": "1.3",
+      "waves": [
+        {
+          "wave": 1,
+          "spawns": [
+            {
+              "order": 1,
+              "zone": "Villa",
+              "spawn": "Villa"
+            },
+            {
+              "order": 2,
+              "zone": "Stable",
+              "spawn": "Beach"
+            },
+            {
+              "order": 3,
+              "zone": "Farm",
+              "spawn": "Left"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "x-endpoint": {
+    "method": "PUT",
+    "path": "/api/rotations/tsushima/{week_start}/{map_slug}",
+    "headers": {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    }
+  },
+  "x-pathParameters": {
+    "week_start": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Tuesday date in Australia/Melbourne reset terms."
+    },
+    "map_slug": {
+      "type": "string",
+      "enum": [
+        "the-defence-of-aoi-village",
+        "the-shadows-of-war",
+        "the-shores-of-vengeance",
+        "blood-in-the-snow",
+        "twilight-and-ashes",
+        "blood-and-steel"
+      ]
+    }
+  },
+  "x-mapConstraints": {
+    "the-defence-of-aoi-village": {
+      "week_codes": [
+        "1.3",
+        "2.1",
+        "2.5"
+      ],
+      "zones": {
+        "Villa": [
+          "Villa"
+        ],
+        "Stable": [
+          "Beach",
+          "Hut"
+        ],
+        "Farm": [
+          "Left",
+          "Right"
+        ]
+      }
+    },
+    "the-shadows-of-war": {
+      "week_codes": [
+        "1.4",
+        "1.7",
+        "2.6"
+      ],
+      "zones": {
+        "Stable": [
+          "Stable"
+        ],
+        "Barracks": [
+          "Left",
+          "Middle",
+          "Right"
+        ],
+        "Dojo": [
+          "Left",
+          "Right",
+          "Deep"
+        ]
+      }
+    },
+    "the-shores-of-vengeance": {
+      "week_codes": [
+        "1.1",
+        "1.8",
+        "2.8"
+      ],
+      "zones": {
+        "Cliff": [
+          "Forest",
+          "Hut"
+        ],
+        "Boat": [
+          "Boat"
+        ],
+        "Beach": [
+          "Beach"
+        ]
+      }
+    },
+    "blood-in-the-snow": {
+      "week_codes": [
+        "1.2",
+        "2.2"
+      ],
+      "zones": {
+        "Mine": [
+          "Mine"
+        ],
+        "Outpost": [
+          "Outpost"
+        ],
+        "Camp": [
+          "Camp"
+        ]
+      }
+    },
+    "twilight-and-ashes": {
+      "week_codes": [
+        "1.5",
+        "2.3",
+        "2.7"
+      ],
+      "zones": {
+        "Obelisk": [
+          "Obelisk"
+        ],
+        "Ledge": [
+          "Cliff",
+          "Boulder"
+        ],
+        "Lighthouse": [
+          "Side",
+          "Boulder"
+        ]
+      }
+    },
+    "blood-and-steel": {
+      "week_codes": [
+        "1.6",
+        "2.4"
+      ],
+      "zones": {
+        "Camp": [
+          "Left",
+          "Right"
+        ],
+        "Island": [
+          "Left",
+          "Cart"
+        ],
+        "Cliff": [
+          "Top",
+          "Cart"
+        ]
+      }
+    }
+  }
+}
