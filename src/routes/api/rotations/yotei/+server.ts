@@ -4,9 +4,7 @@ import {
 	collectUnexpectedKeys,
 	fail,
 	getAdminSupabase,
-	isIsoDate,
 	isPlainObject,
-	isTuesday,
 	normalizeOptionalString,
 	ok,
 	readJsonBody,
@@ -14,6 +12,7 @@ import {
 	requireJsonRequest,
 	type ApiErrorDetail
 } from '$lib/server/bot-api';
+import { getCurrentWeekStart } from '$lib/dates';
 import type { UpsertRotationPayload } from '$lib/types';
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
@@ -30,22 +29,30 @@ type MapRow = {
 	locations: string[];
 };
 
-export const PUT: RequestHandler = async ({ params, request }) => {
+export const PUT: RequestHandler = async ({ request }) => {
 	const authError = requireBearerToken(request, env.BOT_API_TOKEN_YOTEI);
 	if (authError) return authError;
 
 	const contentTypeError = requireJsonRequest(request);
 	if (contentTypeError) return contentTypeError;
 
-	const { week_start, map_slug } = params;
-	if (!isIsoDate(week_start) || !isTuesday(week_start)) {
-		return fail(400, 'validation_error', 'week_start must be a Tuesday in YYYY-MM-DD format.', [
-			{ path: 'week_start', message: 'Expected a Tuesday date string.' }
+	const { data: body, error: bodyError } = await readJsonBody(request);
+	if (bodyError) return bodyError;
+
+	if (!isPlainObject(body)) {
+		return fail(400, 'validation_error', 'Request body must be a JSON object.', [
+			{ path: '', message: 'Expected a JSON object.' }
 		]);
 	}
 
-	const { data: body, error: bodyError } = await readJsonBody(request);
-	if (bodyError) return bodyError;
+	const map_slug = typeof body.map_slug === 'string' ? body.map_slug.trim() : '';
+	if (!map_slug) {
+		return fail(400, 'validation_error', 'Payload validation failed.', [
+			{ path: 'map_slug', message: 'Expected a non-empty map_slug string.' }
+		]);
+	}
+
+	const week_start = getCurrentWeekStart();
 
 	const supabase = getAdminSupabase();
 	const [mapResult, challengesResult] = await Promise.all([
@@ -104,7 +111,7 @@ function validateYoteiPayload(
 		};
 	}
 
-	collectUnexpectedKeys(body, ['credit_text', 'challenges', 'rounds'], '', details);
+	collectUnexpectedKeys(body, ['map_slug', 'credit_text', 'challenges', 'rounds'], '', details);
 
 	const creditText = normalizeCreditText(body.credit_text, 'credit_text', details);
 	const challengeLookup = new Map(challenges.map((challenge) => [challenge.name, challenge.id]));
@@ -386,7 +393,7 @@ export const GET: RequestHandler = async () =>
 			ok: true,
 			game: 'yotei',
 			method: 'PUT',
-			path: '/api/rotations/yotei/{week_start}/{map_slug}'
+			path: '/api/rotations/yotei'
 		},
 		{ status: 200 }
 	);

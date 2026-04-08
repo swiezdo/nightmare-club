@@ -20,9 +20,23 @@ export const ROUND_COUNT = 4;
 /** Maps that support attunement tracking */
 export const ATTUNEMENT_MAP_SLUGS = new Set(['hidden-temple']);
 
-/** Weekly reset: Tuesday 1:00 AM Australia/Melbourne */
+/** Shared shape for weekly in-game reset anchoring */
+export type ResetSchedule = {
+	readonly weekday: number;
+	readonly hour: number;
+	readonly timezone: string;
+};
+
+/** Ghost of Yōtei: Tuesday 1:00 AM Australia/Melbourne */
 export const RESET_SCHEDULE = {
 	weekday: 2, // 0=Sun … 6=Sat; 2=Tuesday
 	hour: 1, // 1:00 AM
 	timezone: 'Australia/Melbourne'
-} as const;
+} as const satisfies ResetSchedule;
+
+/** Ghost of Tsushima: in-game weekly refresh Friday 18:00 (Europe/Moscow tz in code only — UI shows local time). */
+export const TSUSHIMA_RESET_SCHEDULE = {
+	weekday: 5,
+	hour: 18,
+	timezone: 'Europe/Moscow'
+} as const satisfies ResetSchedule;

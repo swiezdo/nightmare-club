@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { getZonedDateParts } from '$lib/dates';
 import { json } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { timingSafeEqual } from 'node:crypto';
@@ -144,6 +145,14 @@ export function isIsoDate(value: string) {
 export function isTuesday(value: string) {
 	if (!isIsoDate(value)) return false;
 	return new Date(`${value}T12:00:00Z`).getUTCDay() === 2;
+}
+
+/** Tsushima `week_start`: calendar Friday for the rotation week (in-game weekly boundary). */
+export function isTsushimaWeekAnchorDate(value: string): boolean {
+	if (!isIsoDate(value)) return false;
+	const [y, mo, d] = value.split('-').map(Number);
+	const utcMs = Date.UTC(y, mo - 1, d, 9, 0, 0);
+	return getZonedDateParts(new Date(utcMs), 'Europe/Moscow').weekday === 5;
 }
 
 let adminClient:

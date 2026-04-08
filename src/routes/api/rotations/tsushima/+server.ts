@@ -2,9 +2,7 @@ import {
 	collectUnexpectedKeys,
 	fail,
 	getAdminSupabase,
-	isIsoDate,
 	isPlainObject,
-	isTuesday,
 	normalizeOptionalString,
 	ok,
 	readJsonBody,
@@ -12,6 +10,7 @@ import {
 	requireJsonRequest,
 	type ApiErrorDetail
 } from '$lib/server/bot-api';
+import { getTsushimaWeekStart } from '$lib/dates';
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
@@ -39,22 +38,30 @@ type TsushimaMapRow = {
 const TSUSHIMA_WAVE_COUNT = 15;
 const TSUSHIMA_SPAWN_COUNT = 3;
 
-export const PUT: RequestHandler = async ({ params, request }) => {
+export const PUT: RequestHandler = async ({ request }) => {
 	const authError = requireBearerToken(request, env.BOT_API_TOKEN_TSUSHIMA);
 	if (authError) return authError;
 
 	const contentTypeError = requireJsonRequest(request);
 	if (contentTypeError) return contentTypeError;
 
-	const { week_start, map_slug } = params;
-	if (!isIsoDate(week_start) || !isTuesday(week_start)) {
-		return fail(400, 'validation_error', 'week_start must be a Tuesday in YYYY-MM-DD format.', [
-			{ path: 'week_start', message: 'Expected a Tuesday date string.' }
+	const { data: body, error: bodyError } = await readJsonBody(request);
+	if (bodyError) return bodyError;
+
+	if (!isPlainObject(body)) {
+		return fail(400, 'validation_error', 'Request body must be a JSON object.', [
+			{ path: '', message: 'Expected a JSON object.' }
 		]);
 	}
 
-	const { data: body, error: bodyError } = await readJsonBody(request);
-	if (bodyError) return bodyError;
+	const map_slug = typeof body.map_slug === 'string' ? body.map_slug.trim() : '';
+	if (!map_slug) {
+		return fail(400, 'validation_error', 'Payload validation failed.', [
+			{ path: 'map_slug', message: 'Expected a non-empty map_slug string.' }
+		]);
+	}
+
+	const week_start = getTsushimaWeekStart();
 
 	const supabase = getAdminSupabase();
 	const { data: map, error: mapError } = await supabase
@@ -74,9 +81,10 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		return fail(400, 'validation_error', 'Payload validation failed.', validation.details);
 	}
 
-	const { data: rotationId, error: rpcError } = await supabase.rpc('upsert_tsushima_rotation', {
-		payload: validation.payload
-	});
+	const { data: rotationId, error: rpcError } = await supabase.rpc(
+		'upsert_tsushima_rotation',
+		{ payload: validation.payload } as never
+	);
 
 	if (rpcError || !rotationId) {
 		console.error('[bot api] failed to persist tsushima rotation', rpcError);
@@ -108,7 +116,7 @@ function validateTsushimaPayload(
 		};
 	}
 
-	collectUnexpectedKeys(body, ['credit_text', 'week_code', 'waves'], '', details);
+	collectUnexpectedKeys(body, ['map_slug', 'credit_text', 'week_code', 'waves'], '', details);
 
 	const creditText = normalizeCreditText(body.credit_text, 'credit_text', details);
 	const weekCode = typeof body.week_code === 'string' ? body.week_code.trim() : '';
@@ -224,7 +232,16 @@ function validateTsushimaWaves(
 				});
 			}
 
-			if (typeof spawn.zone !== 'string' || !zoneLookup.has(spawn.zone)) {
+			const zoneRaw = typeof spawn.zone === 'string' ? spawn.zone.trim() : '';
+			const spawnRaw = typeof spawn.spawn === 'string' ? spawn.spawn.trim() : '';
+
+			// Empty zone: unset slot; ignore spawn and persist both as empty.
+			if (!zoneRaw) {
+				spawns.push({ order: expectedOrder, zone: '', spawn: '' });
+				continue;
+			}
+
+			if (!zoneLookup.has(zoneRaw)) {
 				details.push({
 					path: `${spawnPath}.zone`,
 					message: `Expected one of: ${map.zones.map((zone) => zone.zone).join(', ')}.`
@@ -232,8 +249,14 @@ function validateTsushimaWaves(
 				continue;
 			}
 
-			const allowedSpawns = zoneLookup.get(spawn.zone)!;
-			if (typeof spawn.spawn !== 'string' || !allowedSpawns.has(spawn.spawn)) {
+			const allowedSpawns = zoneLookup.get(zoneRaw)!;
+			// Zone set, spawn empty: allowed.
+			if (!spawnRaw) {
+				spawns.push({ order: expectedOrder, zone: zoneRaw, spawn: '' });
+				continue;
+			}
+
+			if (!allowedSpawns.has(spawnRaw)) {
 				details.push({
 					path: `${spawnPath}.spawn`,
 					message: `Expected one of: ${Array.from(allowedSpawns).join(', ')}.`
@@ -241,7 +264,7 @@ function validateTsushimaWaves(
 				continue;
 			}
 
-			spawns.push({ order: expectedOrder, zone: spawn.zone, spawn: spawn.spawn });
+			spawns.push({ order: expectedOrder, zone: zoneRaw, spawn: spawnRaw });
 		}
 
 		result.push({ wave: expectedWave, spawns });
@@ -268,7 +291,7 @@ export const GET: RequestHandler = async () =>
 			ok: true,
 			game: 'tsushima',
 			method: 'PUT',
-			path: '/api/rotations/tsushima/{week_start}/{map_slug}'
+			path: '/api/rotations/tsushima'
 		},
 		{ status: 200 }
 	);

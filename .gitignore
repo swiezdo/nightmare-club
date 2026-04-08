@@ -9,4 +9,5 @@ build
 vite.config.ts.timestamp*
 .superpowers/
 supabase/.temp/
+supabase/_bundle_for_sql_editor.sql
 .DS_Store

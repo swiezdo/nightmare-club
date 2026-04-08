@@ -81,3 +81,51 @@ export type UpsertRotationPayload = {
 		}[];
 	}[];
 };
+
+/** Ghost of Tsushima — map metadata and stored rotation JSON */
+export type TsushimaZone = { zone: string; spawns: string[] };
+
+export type TsushimaWeekOption = {
+	code: string;
+	modifiers: { slot: number; name: string; icon: string }[];
+};
+
+export type TsushimaMapRow = {
+	id: string;
+	slug: string;
+	name: string;
+	zones: TsushimaZone[];
+	week_options: TsushimaWeekOption[];
+	objectives: unknown;
+	wave_modifiers: unknown;
+};
+
+export type TsushimaWaveSpawn = { order: number; zone: string; spawn: string };
+
+export type TsushimaWaveRow = { wave: number; spawns: TsushimaWaveSpawn[] };
+
+export type TsushimaPayloadJson = {
+	map: { slug: string; name: string };
+	week_start: string;
+	week_code: string;
+	credit_text: string | null;
+	weekly_modifiers: TsushimaWeekOption['modifiers'];
+	bonus_objectives: unknown;
+	wave_modifiers: unknown;
+	waves: TsushimaWaveRow[];
+};
+
+export type TsushimaRotationRow = {
+	id: string;
+	map_id: string;
+	week_start: string;
+	week_code: string;
+	credit_text: string | null;
+	payload: TsushimaPayloadJson;
+	created_at?: string;
+	updated_at?: string;
+};
+
+export type TsushimaMapWithRotation = TsushimaMapRow & {
+	rotation: TsushimaRotationRow;
+};

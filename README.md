@@ -11,7 +11,10 @@ It currently uses Supabase for Postgres, auth, and browser/server clients, but t
 - Exposes authenticated bot ingest endpoints for machine-written updates.
 - Stores Tsushima survival metadata and weekly layouts separately from the Yotei rotation tables.
 
-Weekly reset logic is based on Tuesday 1:00 AM in `Australia/Melbourne`. The stored `week_start` value is the Tuesday date for that rotation week.
+Weekly rotation anchors differ by game:
+
+- **Ghost of Yōtei:** Tuesday 1:00 AM in `Australia/Melbourne` (in-game reset aligned with Melbourne). The stored `week_start` is that Tuesday’s calendar date (`YYYY-MM-DD`).
+- **Ghost of Tsushima:** weekly in-game refresh boundary on **Friday** (anchored in code to the same moment as the game’s Friday reset; the countdown on the site is **your browser’s local time**). The stored `week_start` is that week’s **Friday** date (`YYYY-MM-DD`).
 
 ## Stack
 
@@ -34,7 +37,8 @@ src/
   routes/
     +page.svelte       public rotation display
     (admin)/admin/     protected admin UI
-    api/rotations/     authenticated bot ingest endpoints
+    api/rotation/      authenticated bot read (GET yotei, tsushima)
+    api/rotations/     authenticated bot ingest (PUT yotei, tsushima)
 supabase/
   schema.sql           base schema and initial seed data
   seed.sql             example current-week Yotei rotations
@@ -127,12 +131,21 @@ If you want to move to plain Postgres or another hosted provider, the minimum pa
 
 The admin workflow is designed around trusted contributors rather than a large multi-role system.
 
-## Bot Ingest API
+## Bot API
+
+### Read (current site week)
+
+Authenticated JSON for tools and bots (no public unauthenticated rotation feed):
+
+- **`GET /api/rotation/yotei`** — `Authorization: Bearer` with **`BOT_API_TOKEN_YOTEI`** (same secret as `PUT /api/rotations/yotei`). Response: `{ "maps": [ { "name", "slug", "credit_text", "rounds": [ { "round", "challenge"?, "waves": [ { "wave", "spawns": [ { "order", "location", "spawn_point", "attunements"? } ] } ] } ] } ] } }` — only maps that have a rotation row for the current Yōtei week (`getCurrentWeekStart`). `Cache-Control: private, no-store`.
+- **`GET /api/rotation/tsushima`** — `Authorization: Bearer` with **`BOT_API_TOKEN_TSUSHIMA`**. Response: `{ "maps": [ { "week_code", "waves" } ] }` for the current Tsushima week anchor.
+
+### Write (ingest)
 
 Two authenticated write endpoints are available:
 
-- `PUT /api/rotations/yotei/{week_start}/{map_slug}`
-- `PUT /api/rotations/tsushima/{week_start}/{map_slug}`
+- `PUT /api/rotations/yotei`
+- `PUT /api/rotations/tsushima`
 
 Authentication:
 
@@ -141,12 +154,13 @@ Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
-`week_start` must be a Tuesday in `YYYY-MM-DD` format.
+The JSON body must include **`map_slug`**. **`week_start` is not sent**; the server picks the current rotation week using the same rules as the public site (`getCurrentWeekStart` for Yōtei, `getTsushimaWeekStart` for Tsushima). Successful responses echo the stored `week_start` so clients can log which week was written.
 
 ### Yotei Payload
 
 ```json
 {
+  "map_slug": "river-village",
   "credit_text": "Thanks to Player 1 and Player 2",
   "challenges": [
     { "round": 1, "slug": "lose-location" }
@@ -188,6 +202,7 @@ Tsushima keeps map metadata, weekly modifiers, and objectives in the database. T
 
 ```json
 {
+  "map_slug": "the-defence-of-aoi-village",
   "credit_text": "Submitted by NightmareBot",
   "week_code": "1.3",
   "waves": [
@@ -217,7 +232,7 @@ Rules:
   "ok": true,
   "game": "tsushima",
   "rotation_id": "uuid",
-  "week_start": "2026-04-07",
+  "week_start": "2026-04-10",
   "map_slug": "the-defence-of-aoi-village",
   "updated": true
 }

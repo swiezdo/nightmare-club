@@ -71,14 +71,15 @@ pnpm dev
 
 ## 5. Smoke Test With curl
 
-Tsushima example:
+Tsushima example (`week_start` is chosen on the server; body must include `map_slug`):
 
 ```bash
 curl -i \
-  -X PUT 'http://localhost:5173/api/rotations/tsushima/2026-04-07/the-defence-of-aoi-village' \
+  -X PUT 'http://localhost:5173/api/rotations/tsushima' \
   -H 'Authorization: Bearer YOUR_TSUSHIMA_TOKEN' \
   -H 'Content-Type: application/json' \
   --data-raw '{
+    "map_slug": "the-defence-of-aoi-village",
     "credit_text": "Submitted by NightmareBot",
     "week_code": "1.3",
     "waves": [
@@ -161,14 +162,23 @@ curl -i \
   }'
 ```
 
-Yotei example:
+Read current Yōtei week (minimal JSON for bots):
+
+```bash
+curl -sS \
+  -H 'Authorization: Bearer YOUR_YOTEI_TOKEN' \
+  'http://localhost:5173/api/rotation/yotei'
+```
+
+Yotei PUT example:
 
 ```bash
 curl -i \
-  -X PUT 'http://localhost:5173/api/rotations/yotei/2026-04-07/river-village' \
+  -X PUT 'http://localhost:5173/api/rotations/yotei' \
   -H 'Authorization: Bearer YOUR_YOTEI_TOKEN' \
   -H 'Content-Type: application/json' \
   --data-raw '{
+    "map_slug": "river-village",
     "credit_text": "Submitted by NightmareBot",
     "challenges": [],
     "rounds": [
