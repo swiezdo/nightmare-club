@@ -95,7 +95,7 @@
   );
 </script>
 
-<div class="mx-auto min-h-screen max-w-5xl px-2 py-4 sm:px-4 sm:py-8">
+<div class="mx-auto min-h-screen max-w-6xl px-2 py-4 sm:px-4 sm:py-8">
   {#if !hasAnyData}
     <div class="mb-6 flex justify-end" data-html2img-ignore>
       <ThemeToggle bind:theme />

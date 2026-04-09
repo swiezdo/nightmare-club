@@ -76,7 +76,6 @@ insert into challenges (name, description) values
   ('lose-location', 'Lose a location at the start of the stage'),
   ('enemy-ambush', 'Enemy Ambush'),
   ('reduced-healing', 'Reduced Healing'),
-  ('lose-a-point', 'Lose a point at the beginning of the round'),
   ('fast-attacks', 'Enemies have fast attacks'),
   ('hit-harder', 'Enemies hit harder'),
   ('ranged-last-hit', 'Last hit requires Ranged or thrown weapon damage'),
