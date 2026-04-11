@@ -72,19 +72,19 @@ insert into maps (name, slug, locations) values
   ('The Snake (Hidden Temple)', 'hidden-temple', '{"Pagoda","Cemetery","Courtyard"}')
 on conflict (slug) do nothing;
 
+-- Same challenge names as after migrations 20260411100000 + 20260411110000 (ids from default gen_random_uuid()).
 insert into challenges (name, description) values
-  ('lose-location', 'Lose a location at the start of the stage'),
-  ('enemy-ambush', 'Enemy Ambush'),
-  ('reduced-healing', 'Reduced Healing'),
-  ('fast-attacks', 'Enemies have fast attacks'),
-  ('hit-harder', 'Enemies hit harder'),
-  ('ranged-last-hit', 'Last hit requires Ranged or thrown weapon damage'),
-  ('much-more-damage', 'Enemies deal much more damage'),
   ('increased-cooldowns', 'Role Ability cooldowns are increased'),
-  ('unique-enemy-ambush', 'Unique Enemy Ambush'),
+  ('much-more-damage', 'Enemies deal much more damage'),
+  ('ghost-weapon-cooldowns-increased', 'Ghost Weapon cooldowns are increased'),
+  ('ghost-health-drain', 'Ghost''s Health slowly drains'),
   ('spirit-healing-drunk', 'Spirit Healing makes Ghosts drunk'),
   ('extremely-fast-attacks', 'Extremely fast attacks'),
-  ('ghost-health-drain', 'Ghost''s Health slowly drains')
+  ('max-health-significantly-reduced', 'Max Health significantly Reduced'),
+  ('lose-location', 'Lose a location at the start of the stage'),
+  ('ranged-last-hit', 'Last hit requires Ranged or thrown weapon damage'),
+  ('reviving-ghosts-much-longer', 'Reviving Ghosts takes much longer'),
+  ('unique-enemy-ambush', 'Unique Enemy Ambush')
 on conflict (name) do nothing;
 
 -- ============================================================
